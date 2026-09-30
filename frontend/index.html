@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en" x-data="authApp" :class="{dark:darkMode}">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#111a2c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<title>NubNgern - นับเงิน</title>
+
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+<link rel="apple-touch-icon" href="/assets/icon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+tailwind.config={
+  darkMode:'class'
+}
+</script>
+
+<link rel="stylesheet" href="/css/styles.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="/config.js"></script>
+<script src="/js/app.js"></script>
+
+<style>
+[x-cloak]{display:none!important}
+html,body{margin:0}
+</style>
+
+</head>
+
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen">
+
+<main class="max-w-md mx-auto min-h-screen bg-white dark:bg-slate-900 shadow-2xl relative border-x border-slate-200 dark:border-slate-800">
+
+<div x-show="(errorMessage || successMessage) && view!=='auth'" x-cloak :class="errorMessage?'is-error':'is-success'" role="status" class="app-toast" x-text="errorMessage||successMessage"></div>
+
+<div class="min-h-screen pb-20">
+
+<!-- ================= AUTH ================= -->
+
+<section x-show="view==='auth'" x-cloak class="p-6 min-h-screen flex flex-col justify-center space-y-6">
+
+<div class="text-center">
+<h1 class="text-3xl font-extrabold text-emerald-500">
+Nub(N)gern 💰
+</h1>
+<p class="text-xs text-slate-500 mt-2">
+บันทึกรายรับรายจ่ายแบบไม่ซีเรียส
+</p>
+</div>
+
+<div class="bg-slate-50 dark:bg-slate-800/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+
+<div class="text-center">
+<span x-bind:data-auth-mode="isSignUp ? 'signup' : 'signin'" class="text-xs px-3 py-1.5 rounded-full ring-1 transition-all" x-bind:class="isSignUp ? 'bg-indigo-100 text-indigo-700 ring-indigo-200 dark:bg-indigo-950/80 dark:text-indigo-200 dark:ring-indigo-800' : 'bg-emerald-100 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-200 dark:ring-emerald-800'">
+<span x-text="isSignUp?t[lang].badgeSignUp:t[lang].badgeSignIn"></span>
+</span>
+</div>
+
+<div x-show="errorMessage" class="p-3 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-600 text-xs" x-text="errorMessage"></div>
+<div x-show="successMessage" class="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 text-xs" x-text="successMessage"></div>
+
+<form @submit.prevent="handleSubmit" class="space-y-3">
+<div>
+<label class="text-xs" x-text="t[lang].emailLabel"></label>
+<input type="email" x-model="email" required class="w-full mt-1 px-3 py-2.5 rounded-xl border bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700">
+</div>
+
+<div>
+<label class="text-xs" x-text="t[lang].passwordLabel"></label>
+<div class="relative">
+<input :type="showPassword?'text':'password'" x-model="password" required class="w-full mt-1 px-3 py-2.5 rounded-xl border bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700">
+<button type="button" @click="showPassword=!showPassword" class="absolute right-3 top-3.5 text-xs text-slate-400" x-text="showPassword?t[lang].hidePass:t[lang].showPass"></button>
+</div>
+</div>
+
+<button type="submit" :disabled="loading" class="w-full py-3 rounded-xl font-bold transition duration-200 shadow-sm ring-1 ring-inset" x-bind:class="isSignUp ? 'app-button-primary bg-indigo-600 hover:bg-indigo-500 text-white ring-indigo-300 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:ring-indigo-700' : 'app-button-primary bg-emerald-600 hover:bg-emerald-500 text-white ring-emerald-300 dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:ring-emerald-700'">
+<span x-show="!loading" x-text="isSignUp?t[lang].btnSubmitSignUp:t[lang].btnSubmitSignIn"></span>
+<span x-show="loading" x-text="t[lang].btnLoading"></span>
+</button>
+</form>
+
+<div class="text-center text-xs text-slate-400 my-2">
+<span x-text="t[lang].orDivider"></span>
+</div>
+
+<div class="grid grid-cols-1 gap-3">
+<button type="button" @click="loginWithGoogle" class="py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-medium flex items-center justify-center gap-2 transition">
+<svg class="w-5 h-5" viewBox="0 0 24 24">
+<path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+<path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.29v3.15C3.33 21.37 7.38 24 12 24z"/>
+<path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.29C.47 8.21 0 10.05 0 12s.47 3.79 1.29 5.42l3.99-3.15z"/>
+<path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.38 0 3.33 2.63 1.29 6.58l3.99 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+</svg>
+<span>Google</span>
+</button>
+
+</div>
+
+<button @click="isSignUp=!isSignUp;errorMessage='';successMessage=''" class="w-full text-xs text-emerald-500 pt-2" x-text="isSignUp?t[lang].toggleToSignIn:t[lang].toggleToSignUp">
+</button>
+
+</div>
+
+</section>
+
+
+<!-- ================= OVERVIEW ================= -->
+
+<section x-show="view==='overview'" x-cloak @touchstart="onDateSwipeStart($event)" @touchend="onDateSwipeEnd($event)" class="p-4 space-y-5 app-overview">
+
+<div class="flex justify-between items-center">
+<div>
+<h2 class="text-xl font-bold" x-text="t[lang].todayOverview"></h2>
+<p class="text-xs text-slate-400" x-text="new Date().toLocaleDateString(lang==='th'?'th-TH':'en-US',{weekday:'long',day:'numeric',month:'short'})"></p>
+</div>
+
+<button @click="toggleLang" class="px-3 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 text-xs" x-text="lang.toUpperCase()"></button>
+</div>
+
+<div class="grid grid-cols-2 gap-3">
+<div class="p-4 rounded-2xl bg-income-soft">
+<span class="text-xs text-income" x-text="t[lang].todayIncome"></span>
+<div class="text-xl font-bold text-income">
+฿<span x-text="filteredIncome.toLocaleString()"></span>
+</div>
+</div>
+
+<div class="p-4 rounded-2xl bg-[#fbe7e1] text-[#8d3e36] dark:bg-[#4c2e2d] dark:text-[#ffd3ca] border border-[#f3d1c8] dark:border-[#6d413d]">
+<span class="text-xs font-semibold text-[#9a4139] dark:text-[#ffd3ca]" x-text="t[lang].todayExpense"></span>
+<div class="text-xl font-bold text-[#9d433b] dark:text-[#ffd3ca]">
+฿<span x-text="filteredExpense.toLocaleString()"></span>
+</div>
+</div>
+</div>
+
+<div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+<button @click="shiftDate(-1)" class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900">‹</button>
+<input type="date" x-model="selectedFilterDate" class="bg-transparent text-sm">
+<button @click="shiftDate(1)" class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900">›</button>
+</div>
+
+<h3 class="font-semibold text-sm" x-text="t[lang].recentTransactions"></h3>
+
+<template x-if="filteredTransactions.length===0">
+<div class="p-8 text-center rounded-2xl bg-slate-50 dark:bg-slate-800 text-xs text-slate-400">
+<span x-text="t[lang].noTransactionsToday"></span>
+</div>
+</template>
+
+<div class="space-y-2">
+<template x-for="item in filteredTransactions" :key="item.id">
+<div x-data="{startX:0,deltaX:0,open:false}" data-testid="transaction-row" class="relative overflow-hidden rounded-2xl">
+<div class="absolute inset-y-0 right-0 w-20 bg-rose-500 flex items-center justify-center">
+<button @click="promptDelete(item.id)" data-testid="swipe-delete" class="text-white text-xs font-bold">Delete</button>
+</div>
+
+<div class="relative p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center gap-2 transition-transform" :style="`transform:translateX(${deltaX}px)`" @touchstart.stop="startX=$event.touches[0].clientX" @touchmove.stop="deltaX=Math.min(0,Math.max(-80,$event.touches[0].clientX-startX))" @touchend.stop="open=deltaX<-40;deltaX=open?-80:0">
+<div class="flex gap-3 items-center min-w-0 flex-1">
+<div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-lg">
+<span x-html="getCategoryIcon(item.category)"></span>
+</div>
+<div>
+<div class="font-bold text-sm" x-text="getCategoryName(item.category)"></div>
+<div class="text-xs text-slate-400">
+<span x-html="getWalletIcon(item.payment_method)"></span>
+<span x-text="getWalletLabel(item.payment_method)"></span>
+</div>
+<div class="text-xs text-slate-500 mt-0.5" x-text="item.note||'-'"></div>
+</div>
+</div>
+
+<div class="app-transaction-actions">
+<div :class="item.type==='income'?'text-income':'text-rose-500'" class="font-bold whitespace-nowrap">
+<span x-text="item.type==='income'?'+' : '-'"></span>
+฿<span x-text="Number(item.amount).toLocaleString()"></span>
+</div>
+<button @click.stop="editTransaction(item)" data-testid="edit-transaction" :aria-label="t[lang].editAction" :title="t[lang].editAction" class="app-icon-button p-2 rounded-lg shrink-0">
+<svg class="app-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>
+</button>
+<button @click.stop="promptDelete(item.id)" data-testid="delete-transaction" :aria-label="t[lang].confirmDelete" :title="t[lang].confirmDelete" class="app-icon-button app-delete-button p-2 rounded-lg shrink-0">
+<svg class="app-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+</button>
+</div>
+</div>
+</div>
+</template>
+</div>
+
+</section>
+
+
+<!-- ================= DASHBOARD ================= -->
+
+<section x-show="view==='dashboard'" x-cloak class="p-4 space-y-4">
+<h2 class="text-xl font-bold" x-text="t[lang].dashboardTitle"></h2>
+
+<div class="grid grid-cols-2 gap-2">
+<button @click="setChartRange('weekly')" :class="chartRange==='weekly'?'bg-emerald-500 text-black font-bold':'bg-slate-800 text-slate-400'" class="py-2 rounded-xl text-xs" x-text="t[lang].rangeWeekly"></button>
+<button @click="setChartRange('monthly')" :class="chartRange==='monthly'?'bg-emerald-500 text-black font-bold':'bg-slate-800 text-slate-400'" class="py-2 rounded-xl text-xs" x-text="t[lang].rangeMonthly"></button>
+</div>
+
+<div class="grid grid-cols-2 gap-3">
+<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800">
+<div class="text-xs text-slate-400" x-text="t[lang].cardIncome"></div>
+<div class="font-bold text-income">฿<span x-text="rangeSummary.income.toLocaleString()"></span></div>
+</div>
+<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800">
+<div class="text-xs text-slate-400" x-text="t[lang].cardExpense"></div>
+<div class="font-bold text-rose-500">฿<span x-text="rangeSummary.expense.toLocaleString()"></span></div>
+</div>
+<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800">
+<div class="text-xs text-slate-400" x-text="t[lang].cardBalance"></div>
+<div class="font-bold">฿<span x-text="rangeSummary.balance.toLocaleString()"></span></div>
+</div>
+<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800">
+<div class="text-xs text-slate-400" x-text="t[lang].cardSavings"></div>
+<div class="font-bold text-blue-500">฿<span x-text="rangeSummary.savings.toLocaleString()"></span></div>
+</div>
+</div>
+
+<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800">
+<h3 class="font-bold text-sm mb-4" x-text="t[lang].expenseByCategory"></h3>
+<div class="h-64">
+<canvas id="financialOverviewChart"></canvas>
+</div>
+<div class="space-y-2 mt-4">
+<template x-for="cat in expenseByCategory" :key="cat.id">
+<div class="flex justify-between text-xs">
+<span x-text="cat.name"></span>
+<span>฿<span x-text="cat.total.toLocaleString()"></span></span>
+</div>
+</template>
+</div>
+</div>
+</section>
+
+
+<!-- ================= CALENDAR ================= -->
+
+<section x-show="view==='calendar'" x-cloak class="p-4 space-y-4">
+<div class="flex justify-between items-center">
+<h2 class="text-xl font-bold" x-text="t[lang].calendarTitle"></h2>
+<span class="text-xs text-slate-400" x-text="t[lang].heatmapBadge"></span>
+</div>
+
+<div class="app-panel space-y-4">
+<div class="flex items-center justify-between gap-2">
+<button @click="shiftCalendarMonth(-1)" :aria-label="t[lang].previousMonth" class="app-icon-button p-2 rounded-lg">
+<svg class="app-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+</button>
+<h3 data-testid="calendar-month" class="text-sm font-bold text-center" x-text="calendarMonthLabel"></h3>
+<button @click="shiftCalendarMonth(1)" :aria-label="t[lang].nextMonth" class="app-icon-button p-2 rounded-lg">
+<svg class="app-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+</button>
+</div>
+
+<div class="flex justify-between gap-3 text-xs text-slate-500">
+<span><span x-text="t[lang].monthBudgetLabel"></span>: ฿<span x-text="Number(monthlyExpenseBudget||0).toLocaleString(lang==='th'?'th-TH':'en-US')"></span></span>
+<span><span x-text="t[lang].dailyBudgetLabel"></span>: ฿<span x-text="calendarDailyBudget.toLocaleString(lang==='th'?'th-TH':'en-US',{maximumFractionDigits:0})"></span></span>
+</div>
+<p x-show="!monthlyExpenseBudget" class="text-xs text-amber-700 dark:text-amber-300" x-text="t[lang].calendarNoBudget"></p>
+
+<div class="grid grid-cols-7 gap-1.5 text-center">
+<template x-for="weekday in t[lang].weekdays" :key="weekday">
+<span class="py-1 text-[10px] font-semibold text-slate-400" x-text="weekday"></span>
+</template>
+<template x-for="cell in calendarCells" :key="cell.key">
+<button @click="cell.day && selectCalendarDay(cell.day.date)" :disabled="!cell.day" :data-testid="cell.day?'calendar-day':null" :data-date="cell.day?cell.day.date:null" :class="cell.day?`heatmap-cell heatmap-${cell.day.status} ${selectedFilterDate===cell.day.date?'heatmap-selected':''}`:'heatmap-spacer'" :aria-label="cell.day?`${cell.day.dateLabel}, ฿${cell.day.expense.toLocaleString()}, ${cell.day.statusLabel}`:null" :title="cell.day?`${cell.day.dateLabel} · ฿${cell.day.expense.toLocaleString()} · ${cell.day.statusLabel}`:null">
+<span x-show="cell.day" x-text="cell.day?cell.day.day:''"></span>
+</button>
+</template>
+</div>
+
+<div class="grid grid-cols-2 gap-x-3 gap-y-2 text-[10px] text-slate-500">
+<span class="flex items-center gap-2"><i class="heatmap-legend-dot heatmap-green"></i><span x-text="t[lang].heatmapGreen"></span></span>
+<span class="flex items-center gap-2"><i class="heatmap-legend-dot heatmap-amber"></i><span x-text="t[lang].heatmapAmber"></span></span>
+<span class="flex items-center gap-2"><i class="heatmap-legend-dot heatmap-red"></i><span x-text="t[lang].heatmapRed"></span></span>
+<span class="flex items-center gap-2"><i class="heatmap-legend-dot heatmap-empty"></i><span x-text="t[lang].heatmapEmpty"></span></span>
+</div>
+</div>
+</section>
+
+
+<!-- ================= SETTINGS ================= -->
+
+<section x-show="view==='setting'" x-cloak class="p-4 space-y-4">
+<h2 class="text-xl font-bold" x-text="t[lang].settingTitle"></h2>
+
+<form @submit.prevent="updateProfileName" data-testid="profile-form" class="app-panel space-y-3">
+<h3 class="font-bold text-sm" x-text="t[lang].profileLabel"></h3>
+<div>
+<label class="text-xs" x-text="t[lang].displayNameLabel"></label>
+<input type="text" x-model="displayName" data-testid="display-name" maxlength="80" required class="w-full mt-1 px-3 py-2.5 rounded-xl border">
+</div>
+<div>
+<label class="text-xs" x-text="t[lang].monthlyBudgetLabel"></label>
+<input type="number" x-model="monthlyExpenseBudget" data-testid="monthly-budget" min="0.01" max="100000000" step="0.01" class="w-full mt-1 px-3 py-2.5 rounded-xl border" placeholder="0.00">
+<p class="mt-1 text-xs text-slate-400" x-text="t[lang].monthlyBudgetHint"></p>
+</div>
+<button type="submit" :disabled="isUpdatingProfile" class="app-button-primary w-full py-2.5 rounded-xl text-sm font-bold" x-text="isUpdatingProfile?t[lang].btnLoading:t[lang].saveProfile"></button>
+</form>
+
+<button x-show="canInstall" @click="installApp" data-testid="install-app" class="app-button-primary w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+<svg class="app-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+<span x-text="t[lang].installApp"></span>
+</button>
+<p x-show="appInstalled" class="text-center text-xs text-income" x-text="t[lang].appInstalled"></p>
+
+<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-sm" x-text="t[lang].languageHeader"></span>
+<button @click="toggleLang" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-700 text-xs font-bold" x-text="lang.toUpperCase()"></button>
+</div>
+
+<div class="flex justify-between items-center">
+<span class="text-sm" x-text="t[lang].themeHeader"></span>
+<button @click="toggleTheme" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-700 text-xs font-bold" x-text="darkMode?'🌙 Dark':'☀️ Light'"></button>
+</div>
+
+<button @click="logout" class="w-full py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm transition" x-text="t[lang].btnSignOut"></button>
+</div>
+
+<!-- SUBSCRIPTIONS -->
+<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800">
+<h3 class="font-bold text-sm mb-3" x-text="t[lang].subscriptionsTitle"></h3>
+<template x-if="subscriptions.length===0">
+<div class="text-xs text-slate-400" x-text="t[lang].noSubscriptions"></div>
+</template>
+
+<div class="space-y-2">
+<template x-for="sub in subscriptions" :key="sub.id">
+<div class="p-3 rounded-xl bg-white dark:bg-slate-900 flex justify-between items-center">
+<div>
+<div class="font-semibold text-sm" x-text="getCategoryName(sub.category)"></div>
+<div class="text-xs text-slate-400">
+฿<span x-text="Number(sub.amount).toLocaleString()"></span> · <span x-text="sub.frequency"></span>
+</div>
+</div>
+<div class="flex gap-1">
+<button @click="toggleSubscription(sub.id)" class="px-2 py-1 rounded-lg bg-emerald-500 text-black text-[10px] font-bold" x-text="sub.is_active?t[lang].active:t[lang].inactive"></button>
+<button @click="editSubscription(sub)" data-testid="edit-subscription" :aria-label="t[lang].editAction" :title="t[lang].editAction" class="app-icon-button p-2 rounded-lg">
+<svg class="app-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>
+</button>
+<button @click="deleteSubscription(sub.id)" class="px-2 py-1 rounded-lg bg-rose-500 text-white text-[10px] font-bold" x-text="t[lang].deleteSubscription"></button>
+</div>
+</div>
+</template>
+</div>
+</div>
+</section>
+
+</div>
+
+
+<!-- ================= ADD TRANSACTION MODAL ================= -->
+
+<div x-show="showAddModal" x-cloak class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+<div @click.away="showAddModal=false" class="w-full max-w-sm max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800">
+
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-bold text-lg" x-text="editingSubscriptionId?t[lang].editSubscriptionTitle:editingTransactionId?t[lang].editTransactionTitle:t[lang].addTransactionTitle"></h3>
+<button @click="showAddModal=false" class="text-2xl text-slate-400 hover:text-white">×</button>
+</div>
+
+<form @submit.prevent="saveTransaction" class="space-y-4">
+
+<!-- TYPE -->
+<div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+<button type="button" @click="trxType='expense';selectedCategory='food';trxAmount=quickAmounts[0]" :class="trxType==='expense'?'bg-rose-500 text-white shadow':'text-slate-400'" class="py-2.5 rounded-lg text-xs font-bold transition" x-text="t[lang].typeExpense"></button>
+<button type="button" @click="trxType='income';selectedCategory='daily';trxAmount=quickAmounts[0]" :class="trxType==='income'?'bg-emerald-500 text-black shadow':'text-slate-400'" class="py-2.5 rounded-lg text-xs font-bold transition" x-text="t[lang].typeIncome"></button>
+</div>
+
+<!-- AMOUNT -->
+<div class="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-center">
+<div class="text-xs text-slate-400" x-text="t[lang].amountLabel"></div>
+<div class="flex justify-center items-center mt-1">
+<span class="text-2xl font-bold mr-1" :class="trxType==='expense'?'text-rose-500':'text-emerald-500'">฿</span>
+<input type="number" step="0.01" x-model="trxAmount" data-testid="transaction-amount" required class="w-3/4 bg-transparent text-center text-3xl font-extrabold focus:outline-none" placeholder="0.00">
+</div>
+</div>
+
+<!-- QUICK AMOUNT -->
+<div>
+<div class="text-xs text-slate-400 mb-2" x-text="t[lang].quickAmountTitle"></div>
+<div class="grid grid-cols-3 gap-2">
+<template x-for="amt in quickAmounts">
+<button type="button" @click="trxAmount=amt" class="py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold transition">
++<span x-text="amt.toLocaleString()"></span>
+</button>
+</template>
+</div>
+</div>
+
+<!-- CATEGORY -->
+<div>
+<label class="text-xs font-bold" x-text="t[lang].categoryLabel"></label>
+<div class="grid gap-2 mt-2" :class="trxType==='expense'?'grid-cols-4':'grid-cols-3'">
+<template x-for="cat in (trxType==='expense'?expenseCategories:incomeCategories)" :key="cat.id">
+<button type="button" @click="selectCategory(cat.id)" :class="selectedCategory===cat.id?'border-emerald-500 bg-emerald-500/10 text-emerald-500':'border-slate-200 dark:border-slate-800 text-slate-400'" class="p-3 rounded-2xl border text-[11px] flex flex-col items-center justify-center transition">
+<div class="w-7 h-7 flex items-center justify-center mb-1">
+<span x-html="cat.iconSvg"></span>
+</div>
+<div class="truncate w-full text-center" x-text="cat.name"></div>
+</button>
+</template>
+</div>
+</div>
+
+<!-- PAYMENT METHOD -->
+<div>
+<label class="text-xs font-bold" x-text="t[lang].paymentMethodLabel"></label>
+<div class="grid grid-cols-3 gap-2 mt-2">
+<button type="button" @click="trxWallet='cash'" :class="trxWallet==='cash'?'border-emerald-500 bg-emerald-500/10 text-emerald-500':'border-slate-200 dark:border-slate-800 text-slate-400'" class="p-3 rounded-2xl border text-xs flex flex-col items-center transition">
+<span x-html="getWalletIcon('cash')"></span>
+<span class="mt-1" x-text="t[lang].walletCash"></span>
+</button>
+<button type="button" @click="trxWallet='bank'" :class="trxWallet==='bank'?'border-emerald-500 bg-emerald-500/10 text-emerald-500':'border-slate-200 dark:border-slate-800 text-slate-400'" class="p-3 rounded-2xl border text-xs flex flex-col items-center transition">
+<span x-html="getWalletIcon('bank')"></span>
+<span class="mt-1" x-text="t[lang].walletBank"></span>
+</button>
+<button type="button" @click="trxWallet='credit'" :class="trxWallet==='credit'?'border-emerald-500 bg-emerald-500/10 text-emerald-500':'border-slate-200 dark:border-slate-800 text-slate-400'" class="p-3 rounded-2xl border text-xs flex flex-col items-center transition">
+<span x-html="getWalletIcon('credit')"></span>
+<span class="mt-1" x-text="t[lang].walletCredit"></span>
+</button>
+</div>
+</div>
+
+<!-- DATE -->
+<div>
+<label class="text-xs font-bold" x-text="editingSubscriptionId?t[lang].nextRunDate:t[lang].dateLabel"></label>
+<input type="date" x-model="trxDate" required class="w-full mt-2 px-3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm">
+</div>
+
+<!-- SUBSCRIPTION -->
+<div x-show="!editingTransactionId && !editingSubscriptionId" class="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800">
+<div class="flex justify-between items-center">
+<div>
+<div class="text-xs font-bold" x-text="t[lang].subscriptionLabel"></div>
+<div class="text-[10px] text-slate-400" x-text="t[lang].subscriptionHint"></div>
+</div>
+
+<div class="flex gap-1 bg-slate-200 dark:bg-slate-950 p-1 rounded-xl">
+<button type="button" @click="trxIsSubscription=false" :class="!trxIsSubscription?'bg-white dark:bg-slate-700 font-bold':''" class="px-3 py-1.5 rounded-lg text-xs transition" x-text="t[lang].subscriptionNo"></button>
+<button type="button" @click="trxIsSubscription=true" :class="trxIsSubscription?'bg-emerald-500 text-black font-bold':''" class="px-3 py-1.5 rounded-lg text-xs transition" x-text="t[lang].subscriptionYes"></button>
+</div>
+</div>
+
+<div x-show="trxIsSubscription" x-cloak class="mt-3">
+<label class="text-xs font-bold" x-text="t[lang].frequencyLabel"></label>
+<select x-model="trxFrequency" class="w-full mt-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm">
+<option value="daily" x-text="t[lang].daily"></option>
+<option value="weekly" x-text="t[lang].weekly"></option>
+<option value="monthly" x-text="t[lang].monthly"></option>
+<option value="yearly" x-text="t[lang].yearly"></option>
+</select>
+</div>
+</div>
+
+<!-- NOTE -->
+<div>
+<label class="text-xs font-bold" x-text="t[lang].noteLabel"></label>
+<input type="text" x-model="trxNote" data-testid="transaction-note" placeholder="Note..." class="w-full mt-2 px-3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm">
+</div>
+
+<!-- SUBMIT -->
+<button type="submit" :disabled="isSubmittingTrx" class="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold transition shadow-lg">
+<span x-show="!isSubmittingTrx" x-text="editingTransactionId||editingSubscriptionId?t[lang].saveChanges:t[lang].btnSaveTransaction"></span>
+<span x-show="isSubmittingTrx" x-text="t[lang].btnLoading"></span>
+</button>
+
+</form>
+
+</div>
+</div>
+
+
+<!-- ================= DELETE MODAL ================= -->
+
+<div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+<div class="w-full max-w-xs bg-white dark:bg-slate-900 rounded-3xl p-5 text-center border border-slate-200 dark:border-slate-800">
+<h3 class="font-bold text-lg" x-text="t[lang].deleteConfirmTitle"></h3>
+<p class="text-xs text-slate-400 mt-2" x-text="t[lang].deleteConfirmDesc"></p>
+<div class="grid grid-cols-2 gap-2 mt-5">
+<button @click="showDeleteModal=false;deleteTargetId=null" class="py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-xs font-bold" x-text="t[lang].cancel"></button>
+<button @click="confirmDeleteTransaction" data-testid="confirm-delete" class="py-2.5 rounded-xl bg-rose-500 text-white text-xs font-bold" x-text="t[lang].confirmDelete"></button>
+</div>
+</div>
+</div>
+
+
+<!-- ================= NAV ================= -->
+
+<nav x-show="view!=='auth'" x-cloak class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 p-2 flex items-center z-40">
+<button @click="view='overview'" class="flex-1 text-xs text-center" :class="view==='overview'?'text-emerald-500 font-bold':'text-slate-400'">
+<svg class="app-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+<span x-text="t[lang].navOverview"></span>
+</button>
+
+<button @click="view='dashboard';$nextTick(()=>renderChart())" class="flex-1 text-xs text-center" :class="view==='dashboard'?'text-emerald-500 font-bold':'text-slate-400'">
+<svg class="app-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 14 4-4 4 4 6-7"/></svg>
+<span x-text="t[lang].navDashboard"></span>
+</button>
+
+<div class="flex-1 flex justify-center">
+<button @click="openAddModal" aria-label="Add transaction" class="app-fab -translate-y-5 w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-400 shadow-lg flex items-center justify-center">
+<svg class="app-icon app-icon-large" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+</div>
+
+<button @click="openCalendar()" data-testid="calendar-nav" class="flex-1 text-xs text-center" :class="view==='calendar'?'text-emerald-500 font-bold':'text-slate-400'">
+<svg class="app-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/><path d="M8 15h.01M12 15h.01M16 15h.01"/></svg>
+<span x-text="t[lang].navCalendar"></span>
+</button>
+
+<button @click="view='setting'" class="flex-1 text-xs text-center" :class="view==='setting'?'text-emerald-500 font-bold':'text-slate-400'">
+<svg class="app-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M2 14h4M10 8h4M18 16h4"/></svg>
+<span x-text="t[lang].navSetting"></span>
+</button>
+</nav>
+
+</main>
+
+</body>
+</html>

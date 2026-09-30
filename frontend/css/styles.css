@@ -1,0 +1,565 @@
+/* =========================================================
+   SmartFinance Tracker - styles.css (Fixed & Refined)
+========================================================= */
+
+:root {
+  --color-bg-light: #f2f6fc;
+  --color-bg-dark: #111a2c;
+  --color-surface-light: #ffffff;
+  --color-surface-dark: #1a2940;
+  --color-border-light: #dce6f4;
+  --color-border-dark: #334762;
+  --color-text-light: #1a2b45;
+  --color-text-dark: #edf3fc;
+  --color-muted-light: #71819a;
+  --color-muted-dark: #a9b8cf;
+  --color-income: #456ac9;
+  --color-expense: #c75e4b;
+  --transition-theme: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ---------------------------------------------------------
+   1. Base & Theme Coverage Fixes
+--------------------------------------------------------- */
+html {
+  height: 100%;
+  background-color: var(--color-bg-light);
+  color: var(--color-text-light);
+  color-scheme: light;
+  transition: var(--transition-theme);
+}
+
+html.dark {
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-dark);
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100%;
+  background-color: var(--color-bg-light) !important;
+  color: var(--color-text-light) !important;
+  transition: var(--transition-theme);
+  -webkit-font-smoothing: antialiased;
+}
+
+html.dark body {
+  background-color: var(--color-bg-dark) !important;
+  color: var(--color-text-dark) !important;
+}
+
+/* ---------------------------------------------------------
+   2. Headings, Labels & Text Overrides
+--------------------------------------------------------- */
+.text-heading {
+  color: var(--color-text-light) !important;
+}
+
+html.dark .text-heading,
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark label {
+  color: var(--color-text-dark) !important;
+}
+
+.text-muted {
+  color: var(--color-muted-light) !important;
+}
+
+html.dark .text-muted,
+html.dark .text-slate-400,
+html.dark .text-slate-500 {
+  color: var(--color-muted-dark) !important;
+}
+
+/* ---------------------------------------------------------
+   3. Form Inputs Fix (แก้ขอบหาย / พื้นหลังกลืน)
+--------------------------------------------------------- */
+input[type="email"],
+input[type="password"],
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  background-color: var(--color-surface-light) !important;
+  color: var(--color-text-light) !important;
+  border: 1.5px solid var(--color-border-light) !important;
+  border-radius: 0.75rem;
+  transition: var(--transition-theme);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-muted-light) !important;
+}
+
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark input[type="text"],
+html.dark input[type="number"],
+html.dark select,
+html.dark textarea {
+  background-color: #0b1220 !important;
+  color: var(--color-text-dark) !important;
+  border-color: var(--color-border-dark) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: var(--color-muted-dark) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: var(--color-income) !important;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.25) !important;
+}
+
+/* ---------------------------------------------------------
+   4. Buttons & Dividers (แก้ Sign In / Google / LINE)
+--------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  transition: var(--transition-theme), transform 0.1s ease;
+  cursor: pointer;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* ปุ่ม Sign In เด่นชัด */
+.btn-primary {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.btn-primary:hover {
+  background-color: #047857 !important;
+}
+
+/* ปุ่ม Google & Secondary */
+.btn-secondary {
+  background-color: var(--color-surface-light) !important;
+  color: var(--color-text-light) !important;
+  border: 1px solid var(--color-border-light) !important;
+}
+
+html.dark .btn-secondary {
+  background-color: var(--color-surface-dark) !important;
+  color: var(--color-text-dark) !important;
+  border-color: var(--color-border-dark) !important;
+}
+
+/* ปุ่ม LINE */
+.line-btn {
+  background-color: #06c755 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.line-btn:hover {
+  background-color: #05b34c !important;
+}
+
+/* แก้เส้นแบ่ง Divider หาย */
+.divider {
+  background-color: var(--color-border-light) !important;
+  height: 1px !important;
+}
+
+html.dark .divider {
+  background-color: var(--color-border-dark) !important;
+}
+
+/* ---------------------------------------------------------
+   5. Surfaces, Cards & Components
+--------------------------------------------------------- */
+.surface {
+  background-color: var(--color-surface-light) !important;
+  border: 1px solid var(--color-border-light) !important;
+  transition: var(--transition-theme);
+}
+
+html.dark .surface {
+  background-color: var(--color-surface-dark) !important;
+  border-color: var(--color-border-dark) !important;
+}
+
+.card-income {
+  background-color: #dcfce7 !important;
+  color: #15803d !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
+html.dark .card-income {
+  background-color: rgba(21, 128, 61, 0.25) !important;
+  color: #4ade80 !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+.card-expense {
+  background-color: #ffedd5 !important;
+  color: #c2410c !important;
+  border: 1px solid #fed7aa !important;
+}
+
+html.dark .card-expense {
+  background-color: rgba(194, 65, 12, 0.25) !important;
+  color: #fb923c !important;
+  border-color: rgba(249, 115, 22, 0.3) !important;
+}
+
+.icon-btn {
+  background-color: var(--color-surface-light) !important;
+  color: var(--color-text-light) !important;
+  border: 1px solid var(--color-border-light) !important;
+}
+
+html.dark .icon-btn {
+  background-color: var(--color-surface-dark) !important;
+  color: var(--color-text-dark) !important;
+  border-color: var(--color-border-dark) !important;
+}
+
+/* FAB Floating Add Button */
+.fab-add {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #ffffff !important;
+}
+
+/* Modal Overlay & Sheet */
+.modal-overlay {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(2px);
+}
+
+.modal-sheet {
+  background-color: var(--color-surface-light) !important;
+  color: var(--color-text-light) !important;
+  border: 1px solid var(--color-border-light) !important;
+}
+
+html.dark .modal-sheet {
+  background-color: var(--color-surface-dark) !important;
+  color: var(--color-text-dark) !important;
+  border-color: var(--color-border-dark) !important;
+}
+
+/* ---------------------------------------------------------
+   6. Utilities
+--------------------------------------------------------- */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+:root {
+  --color-bg-light: #f2f6fc;
+  --color-bg-dark: #111a2c;
+  --color-surface-light: #ffffff;
+  --color-surface-dark: #1a2940;
+  --color-border-light: #dce6f4;
+  --color-border-dark: #334762;
+  --color-text-light: #1a2b45;
+  --color-text-dark: #edf3fc;
+  --color-muted-light: #71819a;
+  --color-muted-dark: #a9b8cf;
+  --color-income: #456ac9;
+  --color-brand: #456ac9;
+  --color-brand-soft: #e8efff;
+}
+
+html,
+body {
+  font-family: 'DM Sans', 'Noto Sans Thai', sans-serif;
+}
+
+body {
+  background-image:
+    linear-gradient(rgba(53, 83, 139, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(53, 83, 139, 0.035) 1px, transparent 1px) !important;
+  background-size: 28px 28px;
+}
+
+html.dark body {
+  background-image:
+    linear-gradient(rgba(183, 205, 242, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(183, 205, 242, 0.025) 1px, transparent 1px) !important;
+}
+
+main.max-w-md {
+  background-color: var(--color-surface-light) !important;
+  border-color: var(--color-border-light) !important;
+  box-shadow: 0 22px 70px rgba(33, 55, 92, 0.12) !important;
+}
+
+html.dark main.max-w-md {
+  background-color: var(--color-bg-dark) !important;
+  border-color: var(--color-border-dark) !important;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.3) !important;
+}
+
+.rounded-2xl { border-radius: 10px !important; }
+.rounded-xl { border-radius: 8px !important; }
+
+.bg-white { background-color: var(--color-surface-light) !important; }
+.bg-slate-50 { background-color: #f6f8fd !important; }
+.bg-slate-100 { background-color: #eef3fa !important; }
+.bg-slate-200 { background-color: #e3ebf7 !important; }
+.border-slate-200,
+.border-slate-300 { border-color: var(--color-border-light) !important; }
+.text-slate-800,
+.text-slate-900 { color: var(--color-text-light) !important; }
+.text-slate-400,
+.text-slate-500 { color: var(--color-muted-light) !important; }
+.text-emerald-500 { color: #456ac9 !important; }
+.bg-emerald-500 { background-color: #456ac9 !important; color: #fff !important; }
+.bg-emerald-500:hover { background-color: #3558b5 !important; }
+.bg-emerald-50 { background-color: #eaf0ff !important; }
+.text-income { color: #28735d !important; }
+.bg-income-soft { background-color: #e5f3ee !important; }
+.border-emerald-500 { border-color: #6485d7 !important; }
+[class~="bg-emerald-500/10"] { background-color: rgba(69, 106, 201, 0.1) !important; }
+.bg-rose-50 { background-color: #fbe7e1 !important; }
+.bg-rose-500 { background-color: #c75e4b !important; }
+.text-rose-500 { color: #a63f34 !important; }
+html.dark .text-rose-500 { color: #ffb3a2 !important; }
+
+html.dark .bg-white,
+html.dark .bg-slate-50 { background-color: #1b2940 !important; }
+html.dark .bg-slate-100 { background-color: #22324b !important; }
+html.dark .bg-slate-200 { background-color: #2d3e59 !important; }
+html.dark .bg-slate-800 { background-color: #1a2940 !important; }
+html.dark .bg-slate-900 { background-color: #16243a !important; }
+html.dark .bg-slate-950 { background-color: #111a2c !important; }
+html.dark .border-slate-200,
+html.dark .border-slate-300,
+html.dark .border-slate-700,
+html.dark .border-slate-800 { border-color: var(--color-border-dark) !important; }
+html.dark .text-slate-400,
+html.dark .text-slate-500 { color: var(--color-muted-dark) !important; }
+html.dark .text-slate-800,
+html.dark .text-slate-900 { color: var(--color-text-dark) !important; }
+html.dark .text-emerald-500 { color: #a9c0ff !important; }
+html.dark .text-income { color: #78c8a7 !important; }
+html.dark .bg-income-soft { background-color: rgba(40, 115, 93, 0.22) !important; }
+html.dark .bg-emerald-500 { background-color: #5275cf !important; color: #fff !important; }
+html.dark .bg-emerald-500:hover { background-color: #6283dd !important; }
+html.dark [class~="bg-emerald-500/10"] { background-color: rgba(111, 145, 225, 0.15) !important; }
+html.dark .bg-rose-500 { background-color: #bd5d4e !important; }
+html.dark .text-rose-500 { color: #f08a76 !important; }
+
+input[type="email"],
+input[type="password"],
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  border-radius: 8px;
+}
+
+button {
+  font-family: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(69, 106, 201, 0.38) !important;
+  outline-offset: 2px;
+}
+
+.app-panel {
+  padding: 16px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 10px;
+  background: #f7f9fd;
+}
+
+html.dark .app-panel {
+  border-color: var(--color-border-dark);
+  background: #1b2940;
+}
+
+.app-button-primary {
+  background: #456ac9;
+  color: #fff;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.app-button-primary:hover { background: #3558b5; }
+.app-button-primary:active { transform: translateY(1px); }
+.app-button-primary:disabled { cursor: wait; opacity: 0.65; }
+
+.app-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0 !important;
+  color: #526683;
+  background: #e8eef8;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.app-icon-button:hover {
+  color: #264a9c;
+  background: #d8e4fb;
+}
+
+.app-delete-button:hover {
+  color: #a84234;
+  background: #f7dfd8;
+}
+
+html.dark .app-icon-button {
+  color: #c0cee5;
+  background: #2c3d57;
+}
+
+html.dark .app-icon-button:hover {
+  color: #d2e0ff;
+  background: #3a5071;
+}
+
+html.dark .app-delete-button:hover {
+  color: #ffb5a2;
+  background: #4a302b;
+}
+
+.heatmap-cell {
+  display: grid;
+  width: 100%;
+  height: 40px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.heatmap-cell:hover { transform: translateY(-1px); }
+.heatmap-green { background: #d8efe5; color: #285a49; }
+.heatmap-amber { background: #faedc9; color: #705819; }
+.heatmap-red { background: #f2d9d6; color: #8a3e39; }
+.heatmap-empty { background: #e6edf7; color: #697b96; }
+.heatmap-selected { box-shadow: inset 0 0 0 2px #456ac9; }
+.heatmap-legend-dot { display: inline-block; width: 10px; height: 10px; flex: 0 0 10px; border-radius: 3px; }
+
+html.dark .heatmap-green { background: #2b5249; color: #d7f4e9; }
+html.dark .heatmap-amber { background: #5d4b28; color: #ffefc2; }
+html.dark .heatmap-red { background: #643a3c; color: #ffe1dc; }
+html.dark .heatmap-empty { background: #2a3a53; color: #adbbd1; }
+html.dark .heatmap-selected { box-shadow: inset 0 0 0 2px #9eb8ff; }
+
+.app-overview { touch-action: pan-y; }
+
+.app-transaction-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.app-icon {
+  display: block;
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.app-icon-large { width: 23px; height: 23px; }
+
+.app-nav-icon {
+  display: block;
+  width: 19px;
+  height: 19px;
+  margin: 0 auto 4px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+nav {
+  min-height: 66px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  border-color: var(--color-border-light) !important;
+}
+
+html.dark nav {
+  background-color: rgba(22, 36, 58, 0.96) !important;
+  border-color: var(--color-border-dark) !important;
+}
+
+nav > button {
+  display: flex;
+  min-height: 46px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.app-fab {
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(48, 78, 150, 0.3) !important;
+}
+
+.app-toast {
+  position: fixed;
+  z-index: 60;
+  top: max(12px, env(safe-area-inset-top));
+  left: 50%;
+  width: min(420px, calc(100% - 28px));
+  padding: 12px 16px;
+  transform: translateX(-50%);
+  border: 1px solid #e9b8ac;
+  border-radius: 8px;
+  background: #fff5f1;
+  color: #963f34;
+  box-shadow: 0 10px 30px rgba(50, 36, 30, 0.15);
+  font-size: 13px;
+}
+
+.app-toast.is-success {
+  border-color: #c5d9a4;
+  background: #f1f8e7;
+  color: #3d5e22;
+}
+
+html.dark .app-toast {
+  border-color: #77453d;
+  background: #382622;
+  color: #ffc1ad;
+}
+
+html.dark .app-toast.is-success {
+  border-color: #506c38;
+  background: #263322;
+  color: #d3f59e;
+}
+
+@media (max-width: 480px) {
+  main.max-w-md {
+    border-right: 0 !important;
+    border-left: 0 !important;
+    box-shadow: none !important;
+  }
+}
+[x-cloak] { display: none !important; }

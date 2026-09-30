@@ -315,12 +315,6 @@ Nub(N)gern 💰
 <button type="submit" :disabled="isUpdatingProfile" class="app-button-primary w-full py-2.5 rounded-xl text-sm font-bold" x-text="isUpdatingProfile?t[lang].btnLoading:t[lang].saveProfile"></button>
 </form>
 
-<button x-show="canInstall" @click="installApp" data-testid="install-app" class="app-button-primary w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
-<svg class="app-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-<span x-text="t[lang].installApp"></span>
-</button>
-<p x-show="appInstalled" class="text-center text-xs text-income" x-text="t[lang].appInstalled"></p>
-
 <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 space-y-4">
 <div class="flex justify-between items-center">
 <span class="text-sm" x-text="t[lang].languageHeader"></span>

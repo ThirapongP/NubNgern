@@ -270,7 +270,17 @@ test('serves an installable PWA shell without caching private API data',async({p
   expect(cachedUrls.every(url=>!url.startsWith('/api/'))).toBe(true);
 });
 
-test('shows and completes the browser install prompt from Settings',async({page})=>{
+test('keeps install out of Settings and disables pinch zoom in installed mode',async({page})=>{
+  await page.addInitScript(()=>{
+    const originalMatchMedia=window.matchMedia.bind(window);
+    window.matchMedia=query=>query==='(display-mode: standalone)'
+      ?{matches:true,media:query,onchange:null,addListener(){},removeListener(){},addEventListener(){},removeEventListener(){},dispatchEvent(){return false;}}
+      :originalMatchMedia(query);
+    Object.defineProperty(navigator,'standalone',{configurable:true,value:true});
+  });
+  await page.reload();
+  await expect(page.locator('meta[name="viewport"]')).toHaveAttribute('content','width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no');
+  await expect(page.locator('html')).toHaveCSS('touch-action','pan-y');
   await page.getByRole('button',{name:'Settings'}).click();
   await page.evaluate(()=>{
     const event=new Event('beforeinstallprompt',{cancelable:true});
@@ -278,6 +288,5 @@ test('shows and completes the browser install prompt from Settings',async({page}
     event.userChoice=Promise.resolve({outcome:'accepted'});
     window.dispatchEvent(event);
   });
-  await page.getByTestId('install-app').click();
-  await expect(page.getByText('App installed')).toBeVisible();
+  await expect(page.getByTestId('install-app')).toHaveCount(0);
 });

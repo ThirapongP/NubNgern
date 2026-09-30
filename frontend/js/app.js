@@ -240,10 +240,6 @@ document.addEventListener('alpine:init', () => {
     loading:false,
     errorMessage:'',
     successMessage:'',
-    installPrompt:null,
-    canInstall:false,
-    appInstalled:false,
-
     showAddModal:false,
     editingTransactionId:null,
     editingSubscriptionId:null,
@@ -518,19 +514,15 @@ document.addEventListener('alpine:init', () => {
     },
 
     async init(){
+      const standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+      if(standalone){
+        const viewport=document.querySelector('meta[name="viewport"]');
+        if(viewport) viewport.content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no';
+        document.documentElement.style.touchAction='pan-y';
+      }
       if('serviceWorker' in navigator&&['http:','https:'].includes(window.location.protocol)){
         navigator.serviceWorker.register('/service-worker.js').catch(error=>console.error('PWA registration failed:',error));
       }
-      window.addEventListener('beforeinstallprompt',event=>{
-        event.preventDefault();
-        this.installPrompt=event;
-        this.canInstall=true;
-      });
-      window.addEventListener('appinstalled',()=>{
-        this.appInstalled=true;
-        this.canInstall=false;
-        this.installPrompt=null;
-      });
       try{
         const client=this.getSupabaseClient();
         const { data:{session} } = await client.auth.getSession();
@@ -1143,15 +1135,6 @@ document.addEventListener('alpine:init', () => {
         return null;
       }
       return new URL('./',currentUrl).toString();
-    },
-
-    async installApp(){
-      if(!this.installPrompt) return;
-      await this.installPrompt.prompt();
-      const choice=await this.installPrompt.userChoice;
-      this.canInstall=false;
-      this.installPrompt=null;
-      this.appInstalled=choice.outcome==='accepted';
     },
 
     async handleSubmit(){

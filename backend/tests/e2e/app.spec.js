@@ -117,13 +117,17 @@ test('creates, edits, and deletes a transaction',async({page})=>{
   await expect(page.getByTestId('transaction-row')).toHaveCount(1);
 
   const row=page.getByTestId('transaction-row').first();
-  await row.locator('.transition-transform').evaluate(element=>{
-    const touch=(x)=>new Touch({identifier:1,target:element,clientX:x,clientY:10});
-    element.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[touch(280)]}));
-    element.dispatchEvent(new TouchEvent('touchmove',{bubbles:true,touches:[touch(180)]}));
-    element.dispatchEvent(new TouchEvent('touchend',{bubbles:true,changedTouches:[touch(180)],touches:[]}));
+  await expect(row.locator('.transition-transform')).toHaveCount(0);
+  await expect(row.getByTestId('swipe-delete')).toHaveCount(0);
+  const overviewDate=page.locator('section.app-overview input[type="date"]');
+  const selectedDate=await overviewDate.inputValue();
+  await row.evaluate(element=>{
+    const touch=x=>new Touch({identifier:1,target:element,clientX:x,clientY:10});
+    element.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[touch(280)],changedTouches:[touch(280)]}));
+    element.dispatchEvent(new TouchEvent('touchend',{bubbles:true,touches:[],changedTouches:[touch(180)]}));
   });
-  await row.getByTestId('swipe-delete').click();
+  await expect(overviewDate).toHaveValue(selectedDate);
+  await row.getByTestId('delete-transaction').click();
   await page.getByTestId('confirm-delete').click();
   await expect(page.getByTestId('transaction-row')).toHaveCount(0);
 });
@@ -214,7 +218,7 @@ test('calculates daily expense levels and opens a selected calendar day',async({
   await expect(page.locator('.app-overview input[type="date"]')).toHaveValue(sampleDays[1]);
 });
 
-test('swipes Home, keeps OAuth callbacks safe, and hides unavailable LINE login',async({page})=>{
+test('scopes date swipes, keeps OAuth callbacks safe, and hides unavailable LINE login',async({page})=>{
   const dateInput=page.locator('.app-overview input[type="date"]');
   const before=await dateInput.inputValue();
   const [year,month,day]=before.split('-').map(Number);
@@ -223,6 +227,13 @@ test('swipes Home, keeps OAuth callbacks safe, and hides unavailable LINE login'
     const touch=(x)=>new Touch({identifier:1,target:element,clientX:x,clientY:12});
     element.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[touch(260)]}));
     element.dispatchEvent(new TouchEvent('touchend',{bubbles:true,changedTouches:[touch(180)],touches:[]}));
+  });
+  await expect(dateInput).toHaveValue(before);
+  await dateInput.evaluate(element=>{
+    const swipeArea=element.parentElement;
+    const touch=(x)=>new Touch({identifier:1,target:swipeArea,clientX:x,clientY:12});
+    swipeArea.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[touch(260)]}));
+    swipeArea.dispatchEvent(new TouchEvent('touchend',{bubbles:true,changedTouches:[touch(180)],touches:[]}));
   });
   await expect(dateInput).toHaveValue(expected);
 
